@@ -33,47 +33,55 @@ new Vue({
             const canvas = this.$refs.lineOverlay;
             const ctx = canvas.getContext('2d');
 
-            // Set canvas size to match image
-            canvas.width = img.width;
-            canvas.height = img.height;
+            // Set canvas size to match container
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
 
             // Clear previous lines
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Calculate pixel positions
-            const cellWidth = canvas.width / 16;
-            const cellHeight = canvas.height / 16;
+            // Calculate pixel positions including padding
+            const imageWidth = img.width;
+            const imageHeight = img.height;
+            const cellWidth = imageWidth / 16;
+            const cellHeight = imageHeight / 16;
 
             // Draw lines
             ctx.strokeStyle = 'red';
             ctx.lineWidth = 2;
 
-            // Vertical lines
+            // Vertical lines - extend beyond image bounds
             ctx.beginPath();
-            ctx.moveTo(this.userCoords.x[0] * cellWidth, 0);
-            ctx.lineTo(this.userCoords.x[0] * cellWidth, canvas.height);
+            ctx.moveTo(this.userCoords.x[0] * cellWidth, -10); // Start above
+            ctx.lineTo(this.userCoords.x[0] * cellWidth, canvas.height + 10); // End below
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(this.userCoords.x[1] * cellWidth, 0);
-            ctx.lineTo(this.userCoords.x[1] * cellWidth, canvas.height);
+            ctx.moveTo(this.userCoords.x[1] * cellWidth, -10);
+            ctx.lineTo(this.userCoords.x[1] * cellWidth, canvas.height + 10);
             ctx.stroke();
 
-            // Horizontal lines
+            // Horizontal lines - extend beyond image bounds
             ctx.beginPath();
-            ctx.moveTo(0, this.userCoords.y[0] * cellHeight);
-            ctx.lineTo(canvas.width, this.userCoords.y[0] * cellHeight);
+            ctx.moveTo(-10, this.userCoords.y[0] * cellHeight);
+            ctx.lineTo(canvas.width + 10, this.userCoords.y[0] * cellHeight);
             ctx.stroke();
 
             ctx.beginPath();
-            ctx.moveTo(0, this.userCoords.y[1] * cellHeight);
-            ctx.lineTo(canvas.width, this.userCoords.y[1] * cellHeight);
+            ctx.moveTo(-10, this.userCoords.y[1] * cellHeight);
+            ctx.lineTo(canvas.width + 10, this.userCoords.y[1] * cellHeight);
             ctx.stroke();
         },
         generateCaptcha() {
             this.loading = true;
             this.captchaImage = null;
             this.result = null;
+            
+            // Reset coordinates to middle ranges
+            this.userCoords = {
+                x: [7, 9],
+                y: [7, 9]
+            };
             
             fetch('/generate-captcha', {
                 method: 'POST',
