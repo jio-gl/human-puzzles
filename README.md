@@ -1,8 +1,7 @@
 # Human Puzzles (GenAI-hard CAPTCHAs)
 
 *Where is the largest rectangle you see in this image?*
-![image](https://github.com/user-attachments/assets/cb7e82bc-e577-4944-bc2a-cfdb2305537e)
-
+![image](https://github.com/user-attachments/assets/6e04768d-559f-4d66-98de-bd12be8ee27f)
 
 A web application that generates CAPTCHAs using geometric figures with random rotations. Users need to count emerging patterns (like triangles) to pass the verification.
 
