@@ -85,34 +85,56 @@ class GeometricCaptcha:
         self.taken_positions.add((grid_x, grid_y))
     
     def create_grid_pacmen(self):
-        """Create a more organized grid of pacman shapes with slight variations"""
-        for row in range(self.rows):
-            for col in range(self.cols):
-                # Skip if position is already taken by an emergent shape
-                if (col, row) in self.taken_positions:
-                    continue
+        """Create a more random distribution of pacman shapes while preventing overlaps"""
+        # Calculate total number of pacmen to create (90% of grid cells)
+        total_pacmen = int(self.rows * self.cols * 0.9)  # Increased from 0.8 to 0.9
+        pacmen_created = 0
+        
+        # Try to place pacmen until we reach the target or hit max attempts
+        max_attempts = total_pacmen * 3  # Allow for some failed attempts
+        attempts = 0
+        
+        while pacmen_created < total_pacmen and attempts < max_attempts:
+            # Generate random position within the image bounds
+            # Leave some padding around the edges
+            padding = self.cell_size
+            x = self.rng.randint(padding, self.width - padding)
+            y = self.rng.randint(padding, self.height - padding)
+            
+            # Check if this position overlaps with any existing pacmen
+            # We'll use a larger radius for overlap checking to ensure good spacing
+            check_radius = self.pacman_radius * 1.5
+            
+            # Get the grid position for overlap checking
+            grid_x = int(x // self.cell_size)
+            grid_y = int(y // self.cell_size)
+            
+            # Check surrounding grid cells for overlaps
+            overlap = False
+            for dx in [-1, 0, 1]:
+                for dy in [-1, 0, 1]:
+                    check_x = grid_x + dx
+                    check_y = grid_y + dy
+                    if (check_x, check_y) in self.taken_positions:
+                        overlap = True
+                        break
+                if overlap:
+                    break
+            
+            if not overlap:
+                # Use strict 90-degree increments with minimal variation
+                base_angle = self.rng.choice([0, 90, 180, 270])
+                variation = self.rng.randint(-5, 5)  # Reduced from -15,15 to -5,5
+                start_angle = (base_angle + variation) % 360
                 
-                # 80% chance to place a pacman at each grid position
-                # This creates a more complete but not perfectly uniform grid
-                if self.rng.random() < 0.8:
-                    # Add mild jitter to create slight irregularity
-                    jitter_x = self.rng.randint(-self.grid_jitter, self.grid_jitter)
-                    jitter_y = self.rng.randint(-self.grid_jitter, self.grid_jitter)
-                    
-                    x = col * self.cell_size + self.cell_size // 2 + jitter_x
-                    y = row * self.cell_size + self.cell_size // 2 + jitter_y
-                    
-                    # Random angles for pacman mouth
-                    # Use 90-degree increments with small variations for better readability
-                    base_angle = self.rng.choice([0, 90, 180, 270])
-                    variation = self.rng.randint(-15, 15)
-                    start_angle = (base_angle + variation) % 360
-                    
-                    # Size of the "mouth" - consistent at around 90 degrees
-                    mouth_size = 90 + self.rng.randint(-10, 10)
-                    end_angle = (start_angle + 360 - mouth_size) % 360
-                    
-                    self.create_pacman(x, y, start_angle, end_angle)
+                # Size of the "mouth" - more consistent at around 90 degrees
+                mouth_size = 90 + self.rng.randint(-5, 5)  # Reduced from -10,10 to -5,5
+                end_angle = (start_angle + 360 - mouth_size) % 360
+                
+                self.create_pacman(x, y, start_angle, end_angle)
+                pacmen_created += 1
+            
+            attempts += 1
     
     def create_kanizsa_triangle(self):
         """Create a Kanizsa triangle with slight irregularities"""
