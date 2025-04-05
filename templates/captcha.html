@@ -1,0 +1,52 @@
+<div class="captcha-container">
+    <h3>Kanizsa Rectangle CAPTCHA</h3>
+    <p class="instructions">
+        Look for the <strong>largest illusory rectangle</strong> formed by the pacman shapes.
+        Enter the grid coordinates of its four corners (x,y) in the boxes below.
+    </p>
+    
+    <div class="captcha-image">
+        <img src="{{ captcha.image_data }}" alt="CAPTCHA Image" id="captcha-image">
+    </div>
+    
+    <div class="coordinates-input">
+        <div class="corner top-left">
+            <label>Top-Left Corner:</label>
+            <div class="coord-pair">
+                <input type="number" name="corner1_x" min="0" max="15" placeholder="X" required>
+                <input type="number" name="corner1_y" min="0" max="15" placeholder="Y" required>
+            </div>
+        </div>
+        
+        <div class="corner top-right">
+            <label>Top-Right Corner:</label>
+            <div class="coord-pair">
+                <input type="number" name="corner2_x" min="0" max="15" placeholder="X" required>
+                <input type="number" name="corner2_y" min="0" max="15" placeholder="Y" required>
+            </div>
+        </div>
+        
+        <div class="corner bottom-right">
+            <label>Bottom-Right Corner:</label>
+            <div class="coord-pair">
+                <input type="number" name="corner3_x" min="0" max="15" placeholder="X" required>
+                <input type="number" name="corner3_y" min="0" max="15" placeholder="Y" required>
+            </div>
+        </div>
+        
+        <div class="corner bottom-left">
+            <label>Bottom-Left Corner:</label>
+            <div class="coord-pair">
+                <input type="number" name="corner4_x" min="0" max="15" placeholder="X" required>
+                <input type="number" name="corner4_y" min="0" max="15" placeholder="Y" required>
+            </div>
+        </div>
+    </div>
+    
+    <input type="hidden" name="captcha_seed" value="{{ captcha.seed }}">
+    <button type="submit" class="submit-btn">Verify</button>
+    
+    <button type="button" class="refresh-btn" onclick="refreshCaptcha()">
+        <i class="fas fa-sync-alt"></i> New CAPTCHA
+    </button>
+</div> 

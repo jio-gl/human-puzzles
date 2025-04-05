@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric CAPTCHA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="container">
+            <h1>Rectangle Trickery: The Gestalt CAPTCHA</h1>
+            <p>Count the number of geometric shapes you see in the image below.</p>
+            
+            <div class="captcha-container" v-if="captchaImage">
+                <img :src="captchaImage" alt="CAPTCHA Image" class="captcha-image">
+                <p>How many triangles do you see in this image?</p>
+                <input type="number" v-model="userCount" min="0" class="count-input">
+                <button @click="verifyCaptcha" class="verify-btn">Verify</button>
+                <button @click="generateCaptcha" class="refresh-btn">Refresh CAPTCHA</button>
+            </div>
+            
+            <div class="loading" v-else>
+                <p>Loading CAPTCHA...</p>
+            </div>
+            
+            <div class="result" v-if="result">
+                <div class="success" v-if="result.success">
+                    <h2>Verification Successful!</h2>
+                    <p>You've successfully completed the CAPTCHA.</p>
+                </div>
+                <div class="failure" v-else>
+                    <h2>Verification Failed</h2>
+                    <p>Most people counted ${result.expected} triangles. Please try again.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

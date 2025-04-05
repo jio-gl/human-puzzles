@@ -1,0 +1,18 @@
+DROP TABLE IF EXISTS captchas;
+DROP TABLE IF EXISTS responses;
+
+CREATE TABLE captchas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    seed TEXT NOT NULL,
+    expected_count INTEGER NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE responses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    captcha_id INTEGER NOT NULL,
+    user_count INTEGER NOT NULL,
+    ip_address TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (captcha_id) REFERENCES captchas (id)
+); 
