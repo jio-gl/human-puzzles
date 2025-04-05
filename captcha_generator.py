@@ -86,39 +86,43 @@ class GeometricCaptcha:
     
     def create_grid_pacmen(self):
         """Create a more random distribution of pacman shapes while preventing overlaps"""
-        # Calculate total number of pacmen to create (90% of grid cells)
-        total_pacmen = int(self.rows * self.cols * 0.9)  # Increased from 0.8 to 0.9
+        # Calculate total number of pacmen to create (99.5% of grid cells)
+        total_pacmen = int(self.rows * self.cols * 0.995)  # Increased from 0.98 to 0.995
         pacmen_created = 0
         
         # Try to place pacmen until we reach the target or hit max attempts
-        max_attempts = total_pacmen * 3  # Allow for some failed attempts
+        max_attempts = total_pacmen * 4  # Increased attempts to ensure higher density
         attempts = 0
         
+        # Calculate safe area to ensure complete pacmans
+        safe_padding = self.cell_size  # One full cell size padding
+        safe_area_start_x = safe_padding
+        safe_area_end_x = self.width - safe_padding
+        safe_area_start_y = safe_padding
+        safe_area_end_y = self.height - safe_padding
+        
         while pacmen_created < total_pacmen and attempts < max_attempts:
-            # Generate random position within the image bounds
-            # Leave some padding around the edges
-            padding = self.cell_size
-            x = self.rng.randint(padding, self.width - padding)
-            y = self.rng.randint(padding, self.height - padding)
-            
-            # Check if this position overlaps with any existing pacmen
-            # We'll use a larger radius for overlap checking to ensure good spacing
-            check_radius = self.pacman_radius * 1.5
+            # Generate random position within the safe area
+            x = self.rng.randint(safe_area_start_x, safe_area_end_x)
+            y = self.rng.randint(safe_area_start_y, safe_area_end_y)
             
             # Get the grid position for overlap checking
             grid_x = int(x // self.cell_size)
             grid_y = int(y // self.cell_size)
             
-            # Check surrounding grid cells for overlaps
+            # Skip if this position would result in a partial pacman
+            if (grid_x < 1 or grid_x >= self.cols - 1 or 
+                grid_y < 1 or grid_y >= self.rows - 1):
+                attempts += 1
+                continue
+            
+            # Check only immediate adjacent cells for overlaps (reduced from 3x3 to plus shape)
             overlap = False
-            for dx in [-1, 0, 1]:
-                for dy in [-1, 0, 1]:
-                    check_x = grid_x + dx
-                    check_y = grid_y + dy
-                    if (check_x, check_y) in self.taken_positions:
-                        overlap = True
-                        break
-                if overlap:
+            for dx, dy in [(0,0), (0,1), (0,-1), (1,0), (-1,0)]:  # Plus shape check
+                check_x = grid_x + dx
+                check_y = grid_y + dy
+                if (check_x, check_y) in self.taken_positions:
+                    overlap = True
                     break
             
             if not overlap:
@@ -127,11 +131,13 @@ class GeometricCaptcha:
                 variation = self.rng.randint(-5, 5)  # Reduced from -15,15 to -5,5
                 start_angle = (base_angle + variation) % 360
                 
-                # Size of the "mouth" - more consistent at around 90 degrees
-                mouth_size = 90 + self.rng.randint(-5, 5)  # Reduced from -10,10 to -5,5
+                # Size of the "mouth" - consistently around 90 degrees with minimal variation
+                mouth_size = 90 + self.rng.randint(-3, 3)  # Very small variation for consistency
                 end_angle = (start_angle + 360 - mouth_size) % 360
                 
-                self.create_pacman(x, y, start_angle, end_angle)
+                # Make pacmans slightly smaller to allow for tighter packing
+                radius = self.pacman_radius * 0.9  # 10% smaller
+                self.create_pacman(x, y, start_angle, end_angle, radius)
                 pacmen_created += 1
             
             attempts += 1

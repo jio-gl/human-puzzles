@@ -3,7 +3,7 @@ new Vue({
     data: {
         captchaImage: null,
         captchaId: null,
-        userCount: null,
+        userCoords: [null, null, null, null, null, null, null, null],  // Array for 4 corners (x,y)
         result: null,
         loading: false
     },
@@ -15,7 +15,7 @@ new Vue({
             this.loading = true;
             this.captchaImage = null;
             this.result = null;
-            this.userCount = null;
+            this.userCoords = [null, null, null, null, null, null, null, null];
             
             fetch('/generate-captcha', {
                 method: 'POST',
@@ -36,8 +36,9 @@ new Vue({
         },
         
         verifyCaptcha() {
-            if (this.userCount === null) {
-                alert('Please enter the number of triangles you see.');
+            // Check if all coordinates are filled
+            if (this.userCoords.some(coord => coord === null)) {
+                alert('Please enter all corner coordinates.');
                 return;
             }
             
@@ -49,7 +50,7 @@ new Vue({
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    count: parseInt(this.userCount)
+                    coordinates: this.userCoords
                 })
             })
             .then(response => response.json())

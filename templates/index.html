@@ -11,12 +11,41 @@
     <div id="app">
         <div class="container">
             <h1>Rectangle Trickery: The Gestalt CAPTCHA</h1>
-            <p>Count the number of geometric shapes you see in the image below.</p>
+            <p>Find the largest illusory rectangle formed by the pacman shapes in the image below.</p>
             
             <div class="captcha-container" v-if="captchaImage">
                 <img :src="captchaImage" alt="CAPTCHA Image" class="captcha-image">
-                <p>How many triangles do you see in this image?</p>
-                <input type="number" v-model="userCount" min="0" class="count-input">
+                <p>Where is the largest rectangle you see in this image?</p>
+                <div class="coordinates-input">
+                    <div class="corner top-left">
+                        <label>Top-Left Corner:</label>
+                        <div class="coord-pair">
+                            <input type="number" v-model="userCoords[0]" min="0" max="15" placeholder="X" required>
+                            <input type="number" v-model="userCoords[1]" min="0" max="15" placeholder="Y" required>
+                        </div>
+                    </div>
+                    <div class="corner top-right">
+                        <label>Top-Right Corner:</label>
+                        <div class="coord-pair">
+                            <input type="number" v-model="userCoords[2]" min="0" max="15" placeholder="X" required>
+                            <input type="number" v-model="userCoords[3]" min="0" max="15" placeholder="Y" required>
+                        </div>
+                    </div>
+                    <div class="corner bottom-right">
+                        <label>Bottom-Right Corner:</label>
+                        <div class="coord-pair">
+                            <input type="number" v-model="userCoords[4]" min="0" max="15" placeholder="X" required>
+                            <input type="number" v-model="userCoords[5]" min="0" max="15" placeholder="Y" required>
+                        </div>
+                    </div>
+                    <div class="corner bottom-left">
+                        <label>Bottom-Left Corner:</label>
+                        <div class="coord-pair">
+                            <input type="number" v-model="userCoords[6]" min="0" max="15" placeholder="X" required>
+                            <input type="number" v-model="userCoords[7]" min="0" max="15" placeholder="Y" required>
+                        </div>
+                    </div>
+                </div>
                 <button @click="verifyCaptcha" class="verify-btn">Verify</button>
                 <button @click="generateCaptcha" class="refresh-btn">Refresh CAPTCHA</button>
             </div>
@@ -32,7 +61,7 @@
                 </div>
                 <div class="failure" v-else>
                     <h2>Verification Failed</h2>
-                    <p>Most people counted ${result.expected} triangles. Please try again.</p>
+                    <p>Please try again with the correct coordinates.</p>
                 </div>
             </div>
         </div>
