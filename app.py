@@ -25,7 +25,7 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', userCoords={'x': [7, 9], 'y': [7, 9]})
 
 @app.route('/generate-captcha', methods=['POST'])
 def create_captcha():

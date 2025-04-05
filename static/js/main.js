@@ -1,21 +1,79 @@
 new Vue({
     el: '#app',
-    data: {
-        captchaImage: null,
-        captchaId: null,
-        userCoords: [null, null, null, null, null, null, null, null],  // Array for 4 corners (x,y)
-        result: null,
-        loading: false
+    data() {
+        return {
+            captchaImage: null,
+            captchaId: null,
+            userCoords: {
+                x: [7, 9],
+                y: [7, 9]
+            },
+            result: null,
+            loading: false
+        };
     },
     mounted() {
+        if (window.initialUserCoords) {
+            this.userCoords = {
+                x: [Number(window.initialUserCoords.x[0]), Number(window.initialUserCoords.x[1])],
+                y: [Number(window.initialUserCoords.y[0]), Number(window.initialUserCoords.y[1])]
+            };
+        }
         this.generateCaptcha();
     },
     methods: {
+        adjustCoord(axis, index, delta) {
+            this.userCoords[axis][index] += delta;
+            this.drawLines();
+        },
+        drawLines() {
+            if (!this.$refs.captchaImage || !this.$refs.lineOverlay) return;
+
+            const img = this.$refs.captchaImage;
+            const canvas = this.$refs.lineOverlay;
+            const ctx = canvas.getContext('2d');
+
+            // Set canvas size to match image
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            // Clear previous lines
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Calculate pixel positions
+            const cellWidth = canvas.width / 16;
+            const cellHeight = canvas.height / 16;
+
+            // Draw lines
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+
+            // Vertical lines
+            ctx.beginPath();
+            ctx.moveTo(this.userCoords.x[0] * cellWidth, 0);
+            ctx.lineTo(this.userCoords.x[0] * cellWidth, canvas.height);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(this.userCoords.x[1] * cellWidth, 0);
+            ctx.lineTo(this.userCoords.x[1] * cellWidth, canvas.height);
+            ctx.stroke();
+
+            // Horizontal lines
+            ctx.beginPath();
+            ctx.moveTo(0, this.userCoords.y[0] * cellHeight);
+            ctx.lineTo(canvas.width, this.userCoords.y[0] * cellHeight);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, this.userCoords.y[1] * cellHeight);
+            ctx.lineTo(canvas.width, this.userCoords.y[1] * cellHeight);
+            ctx.stroke();
+        },
         generateCaptcha() {
             this.loading = true;
             this.captchaImage = null;
             this.result = null;
-            this.userCoords = [null, null, null, null, null, null, null, null];
             
             fetch('/generate-captcha', {
                 method: 'POST',
@@ -28,20 +86,17 @@ new Vue({
                 this.captchaImage = data.image_data;
                 this.captchaId = data.captcha_id;
                 this.loading = false;
+                // Draw lines after image loads
+                this.$nextTick(() => {
+                    this.drawLines();
+                });
             })
             .catch(error => {
                 console.error('Error generating CAPTCHA:', error);
                 this.loading = false;
             });
         },
-        
         verifyCaptcha() {
-            // Check if all coordinates are filled
-            if (this.userCoords.some(coord => coord === null)) {
-                alert('Please enter all corner coordinates.');
-                return;
-            }
-            
             this.loading = true;
             
             fetch('/verify-captcha', {
@@ -50,7 +105,10 @@ new Vue({
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    coordinates: this.userCoords
+                    position: {
+                        x: [Number(this.userCoords.x[0]), Number(this.userCoords.x[1])],
+                        y: [Number(this.userCoords.y[0]), Number(this.userCoords.y[1])]
+                    }
                 })
             })
             .then(response => response.json())
